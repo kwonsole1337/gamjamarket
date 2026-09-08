@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}게시글 수정 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <h1 style="font-size:17px; margin: 6px 0 20px;">게시글 수정</h1>
+
+  <form method="post" action="{{ url_for('products.edit', product_id=product.id) }}" enctype="multipart/form-data">
+    <div class="field">
+      <label>사진 추가 (최대 5장)</label>
+      <div class="image-preview-grid" id="image-preview-grid"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="image-picker-btn">사진 선택</button>
+      <input type="file" name="images" id="image-input" accept="image/*" multiple hidden>
+      <p class="field-hint">이미지 파일만 선택할 수 있어요.</p>
+      <p class="field-hint" id="image-upload-warning" style="color:var(--alert); display:none;"></p>
+    </div>
+
+    <div class="field">
+      <label for="title">제목</label>
+      <input type="text" id="title" name="title" value="{{ product.title }}" required>
+    </div>
+
+    <div class="field">
+      <label for="category">카테고리</label>
+      <select id="category" name="category">
+        {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if product.category == c else '' }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="price">가격</label>
+      <div class="price-input-wrap">
+        <input type="number" id="price" name="price" value="{{ product.price }}" min="0" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="status">거래 상태</label>
+      <select id="status" name="status">
+        <option value="판매중" {{ 'selected' if product.status == '판매중' else '' }}>판매중</option>
+        <option value="예약중" {{ 'selected' if product.status == '예약중' else '' }}>예약중</option>
+        <option value="거래완료" {{ 'selected' if product.status == '거래완료' else '' }}>거래완료</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="preview-toolbar">
+        <label for="description" style="margin:0;">상품 설명</label>
+        <button type="button" class="preview-btn" id="preview-btn">미리보기</button>
+      </div>
+      <textarea id="description" name="description" required>{{ product.description }}</textarea>
+      <div class="preview-pane" id="preview-pane"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">수정 완료</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/image-upload.js') }}"></script>
+{% endblock %}

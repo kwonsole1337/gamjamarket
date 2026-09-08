@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}대시보드 - 감자마켓 관리 시스템{% endblock %}
+{% block page_title %}대시보드{% endblock %}
+
+{% block content %}
+<div class="welcome-note">환영합니다, {{ admin_username }}님</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="label">전체 회원수</div>
+    <div class="value">{{ user_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">전체 상품수</div>
+    <div class="value">{{ product_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">판매중 상품</div>
+    <div class="value">{{ active_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">거래완료 / 총 거래액</div>
+    <div class="value">{{ deal_count }}건</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>최근 가입 회원</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>아이디</th><th>닉네임</th><th>가입일</th></tr>
+    </thead>
+    <tbody>
+      {% for u in recent_users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.nickname }}</td>
+          <td>{{ u.created_at }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

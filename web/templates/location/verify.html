@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}동네인증 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="location-page">
+  <div class="location-illust">📍🥔</div>
+  <h1 style="font-size:18px; margin:0 0 6px;">동네인증</h1>
+  <p style="font-size:13.5px; color:var(--muted); margin-bottom:4px;">
+    실제 거주 동네를 인증하면 우리 동네 이웃들과만 안전하게 거래할 수 있어요.
+  </p>
+
+  {% if current_user.verified_town %}
+    <div class="pay-badge" style="margin-top:14px;">✅ {{ current_user.verified_town.name }} 인증완료</div>
+  {% endif %}
+
+  <button class="btn btn-primary" id="geo-btn" style="margin-top:16px;">내 위치로 동네인증하기</button>
+  <div id="geo-status"></div>
+
+  <div class="town-list">
+    <div class="section-title" style="padding:0 0 8px;">인증 가능 동네 목록</div>
+    {% for t in towns %}
+      <div class="town-item">
+        <span>{{ t.name }}</span>
+        <span class="radius">반경 {{ t.radius_m }}m</span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script id="towns-data" type="application/json">{{ towns_json|safe }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/location.js') }}"></script>
+{% endblock %}

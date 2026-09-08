@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}채팅방 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="chat-product-strip">
+  <a href="{{ url_for('products.detail', product_id=chat.product.id) }}" style="display:flex; gap:10px; align-items:center; flex:1;">
+    <span>{{ chat.product.title }}</span>
+    <span class="p">{{ chat.product.price|won }}</span>
+  </a>
+</div>
+
+{% if chat.shared_address or chat.shared_phone %}
+<div class="share-box" style="background:var(--sprout-soft); border-style:solid; border-color:var(--sprout);">
+  <b>📍 공유된 거래 정보</b><br>
+  주소: {{ chat.shared_address or '-' }}<br>
+  연락처: {{ chat.shared_phone or '-' }}
+</div>
+{% endif %}
+
+<div class="chat-messages" style="padding-bottom:150px;">
+  {% set is_participant = current_user.id in (chat.buyer_id, chat.seller_id) %}
+  {% for m in messages %}
+    {% set is_system = m.message.startswith('📍') %}
+    {% if is_participant %}
+      {% set is_right = m.sender_id == current_user.id %}
+    {% else %}
+      {% set is_right = m.sender_id == chat.seller_id %}
+    {% endif %}
+    <div class="msg-row {{ 'system' if is_system else ('mine' if is_right else '') }}">
+      <div class="msg-group">
+        <div class="msg-bubble">{{ m.message }}</div>
+        <div class="msg-time">{{ m.sender.nickname }} · {{ m.created_at.strftime('%m/%d %H:%M') }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<details style="margin: 0 16px 90px;">
+  <summary style="font-size:12.5px; color:var(--accent-dark); cursor:pointer;">📍 위치·연락처 공유하기</summary>
+  <form method="post" action="{{ url_for('chat.share_location', chat_id=chat.id) }}" class="share-box">
+    <input type="text" name="address" placeholder="거래 희망 주소 (예: 서울 강남구 ○○동 123)" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px;">
+    <input type="tel" name="phone" placeholder="연락처 (예: 010-1234-5678)" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px;">
+    <button type="submit" class="btn btn-sprout btn-sm">공유하기</button>
+  </form>
+</details>
+
+<form method="post" action="{{ url_for('chat.send_message', chat_id=chat.id) }}" class="chat-input-bar">
+  <input type="text" name="message" placeholder="메시지를 입력하세요" autocomplete="off" required>
+  <button type="submit">➤</button>
+</form>
+{% endblock %}

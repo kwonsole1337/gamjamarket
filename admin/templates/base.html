@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}감자마켓 관리 시스템{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">감자마켓 관리 시스템<small>Internal Operations Console</small></div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">대시보드</a>
+      <a href="{{ url_for('members') }}" class="{{ 'active' if request.endpoint == 'members' }}">회원 관리</a>
+      <a href="{{ url_for('products') }}" class="{{ 'active' if request.endpoint == 'products' }}">상품 관리</a>
+    </nav>
+    <a href="{{ url_for('logout') }}" class="logout">로그아웃</a>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <h1>{% block page_title %}{% endblock %}</h1>
+      <div class="who">{{ admin_username }} 로 로그인됨</div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}상품 관리 - 감자마켓 관리 시스템{% endblock %}
+{% block page_title %}상품 관리{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <h2>전체 상품 ({{ products|length }}개)</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>제목</th><th>카테고리</th><th>가격</th><th>상태</th><th>판매자</th><th>등록일</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ p.title }}</td>
+          <td>{{ p.category }}</td>
+          <td>{{ "{:,}".format(p.price) }}원</td>
+          <td>
+            {% if p.status == '판매중' %}
+              <span class="badge badge-active">{{ p.status }}</span>
+            {% else %}
+              <span class="badge badge-inactive">{{ p.status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ p.seller_nickname }}</td>
+          <td>{{ p.created_at }}</td>
+          <td>
+            <form method="post" action="{{ url_for('delete_product', product_id=p.id) }}"
+                  onsubmit="return confirm('이 상품을 삭제할까요?');">
+              <button type="submit" class="btn-del">삭제</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

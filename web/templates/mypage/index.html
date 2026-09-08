@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}마이감자 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="mypage-header">
+  <div class="mypage-avatar">{{ current_user.profile_emoji }}</div>
+  <div>
+    <div style="font-weight:800; font-size:16px;">{{ current_user.nickname }}</div>
+    <div class="manner-temp">매너온도 {{ "%.1f"|format(current_user.manner_score) }}°C</div>
+    <div style="font-size:12px; color:var(--muted); margin-top:2px;">
+      {% if current_user.verified_town %}📍 {{ current_user.verified_town.name }} 인증완료{% else %}동네인증 전{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="wallet-summary" style="margin: 16px;">
+  <div class="wallet-row">
+    <span>감자머니 잔액</span>
+    <span class="wallet-amount">{{ current_user.gamja_money_balance|won }}</span>
+  </div>
+  <a href="{{ url_for('wallet.charge_page') }}"
+     style="display:block; text-align:center; margin-top:12px; background:rgba(255,255,255,0.12);
+            border-radius:8px; padding:9px; font-size:13px; font-weight:600; color:#fff;">
+    충전하기
+  </a>
+</div>
+
+<div class="menu-grid">
+  <a href="{{ url_for('mypage.selling') }}">
+    <span class="count">{{ selling_count }}</span>판매내역
+  </a>
+  <a href="{{ url_for('mypage.buying') }}">
+    <span class="count">{{ buying_count }}</span>구매내역
+  </a>
+  <a href="{{ url_for('mypage.favorites') }}">
+    <span class="count">{{ favorite_count }}</span>관심목록
+  </a>
+</div>
+
+<div class="section-title">계정</div>
+<div class="product-list">
+  <a class="product-row" href="{{ url_for('location.verify_page') }}" style="align-items:center;">
+    <div class="product-info"><p class="product-title" style="font-weight:600;">📍 동네인증 관리</p></div>
+  </a>
+  <a class="product-row" href="{{ url_for('auth.logout') }}" style="align-items:center;">
+    <div class="product-info"><p class="product-title" style="font-weight:600; color:var(--alert);">🚪 로그아웃</p></div>
+  </a>
+</div>
+{% endblock %}

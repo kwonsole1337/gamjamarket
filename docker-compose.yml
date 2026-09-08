@@ -1,0 +1,102 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: gamjamarket-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: gamjaRootPass!23
+      MYSQL_DATABASE: gamja_market
+      MYSQL_USER: gamja_app
+      MYSQL_PASSWORD: gamjaAppPass!23
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - gamja_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pgamjaRootPass!23"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - gamja_net
+
+  web:
+    build: ./web
+    container_name: gamjamarket-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: gamja_app
+      MYSQL_PASSWORD: gamjaAppPass!23
+      MYSQL_DATABASE: gamja_market
+      SECRET_KEY: "gamja-mkt-prod-k3y-8f4c!!"
+      FLASK_DEBUG: "1"
+    ports:
+      - "5000:5000"
+    volumes:
+      - gamja_uploads:/app/uploads
+    networks:
+      - gamja_net
+
+  admin_db:
+    image: mysql:8.0
+    container_name: gamjamarket-admin-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: gmAdminRootPass!99
+      MYSQL_DATABASE: gamja_admin
+      MYSQL_USER: gmadmin_app
+      MYSQL_PASSWORD: gmAdminDbPass!45
+      TZ: Asia/Seoul
+    volumes:
+      - gamja_admin_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pgmAdminRootPass!99"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - gamja_net
+
+  admin:
+    build: ./admin
+    container_name: gamjamarket-admin
+    restart: unless-stopped
+    depends_on:
+      admin_db:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      ADMIN_MYSQL_HOST: admin_db
+      ADMIN_MYSQL_PORT: 3306
+      ADMIN_MYSQL_USER: gmadmin_app
+      ADMIN_MYSQL_PASSWORD: gmAdminDbPass!45
+      ADMIN_MYSQL_DATABASE: gamja_admin
+      ADMIN_SECRET_KEY: "gm-admin-internal-key-2024"
+      MAIN_MYSQL_HOST: db
+      MAIN_MYSQL_PORT: 3306
+      MAIN_MYSQL_USER: gamja_app
+      MAIN_MYSQL_PASSWORD: gamjaAppPass!23
+      MAIN_MYSQL_DATABASE: gamja_market
+      FLASK_DEBUG: "0"
+    ports:
+      - "19283:5000"
+    networks:
+      - gamja_net
+
+networks:
+  gamja_net:
+    driver: bridge
+
+volumes:
+  gamja_db_data:
+  gamja_uploads:
+  gamja_admin_db_data:

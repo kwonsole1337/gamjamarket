@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}판매하기 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <h1 style="font-size:17px; margin: 6px 0 20px;">내 물건 팔기</h1>
+
+  <form method="post" action="{{ url_for('products.new') }}" enctype="multipart/form-data">
+    <div class="field">
+      <label>사진 (최대 5장)</label>
+      <div class="image-preview-grid" id="image-preview-grid"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="image-picker-btn">사진 선택</button>
+      <input type="file" name="images" id="image-input" accept="image/*" multiple hidden>
+      <p class="field-hint">이미지 파일만 선택할 수 있어요. 첫 번째 사진이 대표 이미지로 사용돼요.</p>
+      <p class="field-hint" id="image-upload-warning" style="color:var(--alert); display:none;"></p>
+    </div>
+
+    <div class="field">
+      <label for="title">제목</label>
+      <input type="text" id="title" name="title" value="{{ form.get('title','') }}" placeholder="예) 감자 3kg 팔아요" required>
+    </div>
+
+    <div class="field">
+      <label for="category">카테고리</label>
+      <select id="category" name="category">
+        {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if form.get('category') == c else '' }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="price">가격</label>
+      <div class="price-input-wrap">
+        <input type="number" id="price" name="price" value="{{ form.get('price','') }}" min="0" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="trade_type">거래 방식</label>
+      <select id="trade_type" name="trade_type">
+        <option value="직거래" {{ 'selected' if form.get('trade_type') == '직거래' else '' }}>직거래</option>
+        <option value="택배" {{ 'selected' if form.get('trade_type') == '택배' else '' }}>택배거래</option>
+        <option value="둘다" {{ 'selected' if form.get('trade_type') == '둘다' else '' }}>직거래/택배 모두</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="preview-toolbar">
+        <label for="description" style="margin:0;">상품 설명</label>
+        <button type="button" class="preview-btn" id="preview-btn">미리보기</button>
+      </div>
+      <textarea id="description" name="description" required
+        placeholder="상품 상태와 거래 희망 장소를 자세히 적어주세요.&#10;Tip) 설명에 {{닉네임}}, {{동네}} 를 쓰면 미리보기에서 자동으로 내 정보로 바뀌어요!">{{ form.get('description','') }}</textarea>
+      <div class="preview-pane" id="preview-pane"></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">작성 완료</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/image-upload.js') }}"></script>
+{% endblock %}

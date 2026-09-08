@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}관심목록 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">관심목록</div>
+
+{% if favorites %}
+<div class="product-list">
+  {% for f in favorites %}
+    <a class="product-row" href="{{ url_for('products.detail', product_id=f.product.id) }}">
+      <div class="product-thumb">
+        {% if f.product.images %}<img src="{{ url_for('products.uploaded_file', filename=f.product.images[0].filename) }}" alt="">{% else %}🥔{% endif %}
+      </div>
+      <div class="product-info">
+        <p class="product-title">{{ f.product.title }}</p>
+        <p class="product-meta">{{ f.product.town_name or '동네 미인증' }}</p>
+        <p class="product-price">{{ f.product.price|won }}</p>
+      </div>
+    </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;">♡</div>
+  <p>아직 찜한 물건이 없어요.</p>
+</div>
+{% endif %}
+{% endblock %}

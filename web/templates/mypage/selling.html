@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}판매내역 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">판매내역</div>
+
+{% if products %}
+<div class="product-list">
+  {% for p in products %}
+    <div class="product-row" style="align-items:center;">
+      <a href="{{ url_for('products.detail', product_id=p.id) }}" style="display:flex; gap:12px; flex:1; min-width:0;">
+        <div class="product-thumb">
+          {% if p.images %}<img src="{{ url_for('products.uploaded_file', filename=p.images[0].filename) }}" alt="">{% else %}🥔{% endif %}
+        </div>
+        <div class="product-info">
+          <p class="product-title">{{ p.title }}</p>
+          <p class="product-price">{{ p.price|won }}</p>
+          <span class="status-badge status-{{ p.status }}">{{ p.status }}</span>
+        </div>
+      </a>
+      {% if p.id in pending_purchases %}
+        <button class="btn btn-sprout btn-sm confirm-btn" data-purchase-id="{{ pending_purchases[p.id].id }}">
+          거래확정
+        </button>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;">🥔</div>
+  <p>아직 판매한 물건이 없어요.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.confirm-btn').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    if (!confirm('거래를 확정하고 대금을 정산할까요?')) return;
+    const purchaseId = btn.dataset.purchaseId;
+    const res = await fetch(`/api/purchase/${purchaseId}/confirm`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      alert(data.message);
+      location.reload();
+    } else {
+      alert(data.error || '처리 중 오류가 발생했습니다.');
+    }
+  });
+});
+</script>
+{% endblock %}

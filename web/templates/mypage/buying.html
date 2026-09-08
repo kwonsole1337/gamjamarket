@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}구매내역 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">구매내역</div>
+
+{% if purchases %}
+<div class="product-list">
+  {% for pur in purchases %}
+    <a class="product-row" href="{{ url_for('products.detail', product_id=pur.product_id) }}">
+      <div class="product-thumb">
+        {% if pur.product.images %}<img src="{{ url_for('products.uploaded_file', filename=pur.product.images[0].filename) }}" alt="">{% else %}🥔{% endif %}
+      </div>
+      <div class="product-info">
+        <p class="product-title">{{ pur.product.title }}</p>
+        <p class="product-price">{{ pur.amount|won }}</p>
+        <span class="status-badge status-{{ '판매중' if pur.status == '대기' else ('예약중' if pur.status == '결제완료' else '거래완료') }}">
+          {{ pur.status }}
+        </span>
+      </div>
+    </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;">🛍️</div>
+  <p>아직 구매한 물건이 없어요.</p>
+</div>
+{% endif %}
+{% endblock %}

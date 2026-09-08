@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}안전결제 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">안전결제</div>
+
+<div class="pay-summary">
+  <span class="pay-badge">🔒 감자머니 안전결제</span>
+  <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+    <div class="chat-thumb">
+      {% if product.images %}
+        <img src="{{ url_for('products.uploaded_file', filename=product.images[0].filename) }}" alt="">
+      {% else %}🥔{% endif %}
+    </div>
+    <div>
+      <div style="font-weight:700; font-size:14.5px;">{{ product.title }}</div>
+      <div style="font-size:12.5px; color:var(--muted);">{{ product.seller.nickname }} · {{ product.town_name or '동네 미인증' }}</div>
+    </div>
+  </div>
+
+  <div class="pay-row"><span>상품 금액</span><span class="v">{{ product.price|won }}</span></div>
+  <div class="pay-row"><span>안전결제 수수료</span><span class="v">0원</span></div>
+  <div class="pay-row total"><span>총 결제금액</span><span class="v" id="total-amount">{{ product.price|won }}</span></div>
+  <div class="pay-row" style="margin-top:8px; color:var(--muted); font-size:12.5px;">
+    <span>내 감자머니 잔액</span><span class="v">{{ current_user.gamja_money_balance|won }}</span>
+  </div>
+</div>
+
+<div style="padding: 0 16px;">
+  {% if current_user.gamja_money_balance < product.price %}
+    <p style="font-size:13px; color:var(--alert); text-align:center; margin-bottom:10px;">
+      감자머니 잔액이 부족해요. 충전 후 다시 시도해주세요.
+    </p>
+    <a class="btn btn-primary" href="{{ url_for('wallet.charge_page') }}">감자머니 충전하러 가기</a>
+  {% else %}
+    <button class="btn btn-primary" id="pay-btn" data-product-id="{{ product.id }}">
+      {{ product.price|won }} 결제하기
+    </button>
+  {% endif %}
+  <p style="font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px;">
+    결제 완료 후, 물건을 받으면 판매자가 거래를 확정하면 정산됩니다.
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+{% endblock %}

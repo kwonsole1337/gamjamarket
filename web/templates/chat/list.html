@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}채팅 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">채팅</div>
+
+{% if chats %}
+  {% for chat in chats %}
+    {% set other = chat.seller if current_user.id == chat.buyer_id else chat.buyer %}
+    <a class="chat-list-item" href="{{ url_for('chat.chat_room', chat_id=chat.id) }}">
+      <div class="chat-thumb">
+        {% if chat.product.images %}
+          <img src="{{ url_for('products.uploaded_file', filename=chat.product.images[0].filename) }}" alt="">
+        {% else %}🥔{% endif %}
+      </div>
+      <div style="flex:1;">
+        <div class="chat-list-title">{{ other.nickname }}</div>
+        <div class="chat-list-sub">{{ chat.product.title }} · {{ chat.product.price|won }}</div>
+      </div>
+    </a>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div style="font-size:48px;">💬</div>
+    <p>아직 진행중인 채팅이 없어요.</p>
+  </div>
+{% endif %}
+{% endblock %}

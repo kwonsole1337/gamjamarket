@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ product.title }} - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="detail-gallery">
+  {% if product.images %}
+    <a href="{{ url_for('products.uploaded_file', filename=product.images[0].filename) }}" target="_blank">
+      <img src="{{ url_for('products.uploaded_file', filename=product.images[0].filename) }}" alt="{{ product.title }}">
+    </a>
+  {% else %}
+    🥔
+  {% endif %}
+</div>
+
+<div class="seller-row">
+  <div class="seller-emoji">{{ product.seller.profile_emoji }}</div>
+  <div>
+    <div class="seller-name">{{ product.seller.nickname }}</div>
+    <div class="seller-sub">매너온도 {{ "%.1f"|format(product.seller.manner_score) }}°C
+      {% if product.seller.verified_town %} · {{ product.seller.verified_town.name }}{% endif %}</div>
+  </div>
+</div>
+
+<div class="detail-body">
+  <span class="status-badge status-{{ product.status }}">{{ product.status }}</span>
+  <h1 class="detail-title">{{ product.title }}</h1>
+  <p class="detail-meta">{{ product.category }} · {{ product.trade_type }} · 조회 {{ product.view_count }}</p>
+  <p class="detail-desc">{{ product.description }}</p>
+</div>
+
+{% if current_user and current_user.id == product.seller_id %}
+<div class="owner-actions">
+  <a class="btn btn-outline" href="{{ url_for('products.edit', product_id=product.id) }}">수정하기</a>
+  <form method="post" action="{{ url_for('products.delete', product_id=product.id) }}" style="flex:1;"
+        onsubmit="return confirm('정말 삭제하시겠어요?');">
+    <button type="submit" class="btn btn-danger" style="width:100%;">삭제하기</button>
+  </form>
+</div>
+{% endif %}
+
+{% if current_user and current_user.id != product.seller_id %}
+<div class="detail-footer">
+  <button class="icon-fav {{ 'active' if is_favorited else '' }}" id="fav-btn" data-product-id="{{ product.id }}">
+    {{ '♥' if is_favorited else '♡' }}
+  </button>
+  <div class="price-box">
+    <span class="p">{{ product.price|won }}</span>
+  </div>
+  <div class="actions">
+    <form method="post" action="{{ url_for('chat.start_chat', product_id=product.id) }}">
+      <button type="submit" class="btn btn-outline">채팅하기</button>
+    </form>
+    {% if product.status == '판매중' %}
+    <a class="btn btn-primary" href="{{ url_for('payment.checkout_page', product_id=product.id) }}">안전결제</a>
+    {% endif %}
+  </div>
+</div>
+<div class="fixed-footer-spacer"></div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const favBtn = document.getElementById('fav-btn');
+if (favBtn) {
+  favBtn.addEventListener('click', async () => {
+    const productId = favBtn.dataset.productId;
+    const res = await fetch(`/products/${productId}/favorite`, { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      favBtn.textContent = data.favorited ? '♥' : '♡';
+      favBtn.classList.toggle('active', data.favorited);
+    }
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}감자머니 충전 - 감자마켓{% endblock %}
+{% block search_bar %}{% endblock %}
+
+{% block content %}
+<div class="list-page-title">감자머니 충전</div>
+
+<div class="wallet-summary">
+  <div class="wallet-row">
+    <span>감자머니 잔액</span>
+    <span class="wallet-amount" id="gm-balance">{{ current_user.gamja_money_balance|won }}</span>
+  </div>
+  <div class="wallet-row muted">
+    <span>연결계좌 잔액</span>
+    <span id="bank-balance">{{ current_user.bank_balance|won }}</span>
+  </div>
+</div>
+
+<div class="charge-box">
+  <label for="charge-amount">충전할 금액</label>
+  <div class="price-input-wrap">
+    <input type="number" id="charge-amount" min="10000" step="10000" placeholder="0">
+  </div>
+  <p class="field-hint">연결계좌 잔액({{ current_user.bank_balance|won }}) 안에서만 충전할 수 있어요.</p>
+
+  <div class="quick-amounts">
+    <button type="button" class="chip quick-btn" data-add="10000">+1만원</button>
+    <button type="button" class="chip quick-btn" data-add="50000">+5만원</button>
+    <button type="button" class="chip quick-btn" data-add="100000">+10만원</button>
+    <button type="button" class="chip quick-btn" id="clear-btn">초기화</button>
+  </div>
+
+  <button type="button" class="btn btn-primary" id="charge-btn" style="margin-top:16px;">충전하기</button>
+  <p class="field-hint" id="charge-status" style="text-align:center; margin-top:10px;"></p>
+</div>
+
+<div class="section-title">최근 충전 내역</div>
+{% if recent_charges %}
+<div class="product-list">
+  {% for c in recent_charges %}
+    <div class="product-row" style="align-items:center;">
+      <div class="product-info">
+        <p class="product-title" style="font-weight:600;">{{ c.amount|won }} 충전</p>
+        <p class="product-meta">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }} · 계좌 잔액 {{ c.bank_balance_after|won }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p>아직 충전 내역이 없어요.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+const BANK_BALANCE = {{ current_user.bank_balance }};
+
+const amountInput = document.getElementById('charge-amount');
+const chargeBtn = document.getElementById('charge-btn');
+const statusEl = document.getElementById('charge-status');
+
+document.querySelectorAll('.quick-btn[data-add]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const current = parseInt(amountInput.value || '0', 10);
+    amountInput.value = current + parseInt(btn.dataset.add, 10);
+  });
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  amountInput.value = '';
+});
+
+chargeBtn.addEventListener('click', async () => {
+  const amount = parseInt(amountInput.value || '0', 10);
+  if (!amount || amount <= 0) {
+    statusEl.textContent = '충전할 금액을 입력해주세요.';
+    return;
+  }
+  if (amount > BANK_BALANCE) {
+    statusEl.textContent = `❌ 연결계좌 잔액(${BANK_BALANCE.toLocaleString()}원)보다 많은 금액은 충전할 수 없어요.`;
+    return;
+  }
+
+  chargeBtn.disabled = true;
+  chargeBtn.textContent = '충전 처리 중...';
+
+  try {
+    const res = await fetch('/api/wallet/charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount }),
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      statusEl.textContent = `✅ ${amount.toLocaleString()}원이 충전되었습니다.`;
+      setTimeout(() => location.reload(), 700);
+    } else {
+      statusEl.textContent = `❌ ${data.error}`;
+    }
+  } catch (e) {
+    statusEl.textContent = '충전 중 오류가 발생했어요.';
+  } finally {
+    chargeBtn.disabled = false;
+    chargeBtn.textContent = '충전하기';
+  }
+});
+</script>
+{% endblock %}
